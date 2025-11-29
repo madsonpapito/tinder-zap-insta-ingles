@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Input } from "@/components/ui/input"
-import { User, CheckCircle, Heart, MessageCircle, Lock, AlertTriangle, Wifi, Instagram, Whatsapp, Tinder LockOpen } from "lucide-react"
+import { User, CheckCircle, Heart, MessageCircle, Lock, AlertTriangle, Wifi, Instagram, Whatsapp, Tinder, LockOpen } from "lucide-react"
 
 // ==========================================================
 // DADOS DOS PERFIS E IMAGENS
