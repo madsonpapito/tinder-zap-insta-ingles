@@ -48,7 +48,7 @@ export default function D1() {
     { word: "Love", count: 22 },
     { word: "Secret", count: 19 },
     { word: "Hidden", count: 17 },
-    { word: "Don't tell", count: 15 }
+    { word: "Don't tell", count: 15 },
     { word: "Miss you", count: 12 },
     { word: "Thinking of you", count: 12 },
     { word: "Can't stop thinking", count: 10 },
