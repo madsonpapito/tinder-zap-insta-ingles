@@ -286,7 +286,7 @@ export default function Step1Unisex() {
                             <span className="font-bold text-purple-600">Weeks of torturous doubt:</span> Priceless suffering
                         </p>
                         <p className="text-gray-700">
-                            <span className="font-bold text-green-600">InfidelityFind complete scan:</span> Under $50
+                            <span className="font-bold text-green-600">InfidelityFind complete scan:</span> 1 Free Trial Credit
                         </p>
                     </div>
                 </div>
