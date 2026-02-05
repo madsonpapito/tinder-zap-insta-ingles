@@ -504,8 +504,8 @@ export default function Step2() {
           <p className="font-mono text-xs text-yellow-600 text-center">[STATUS] Searching for connected accounts...</p>
           <div className="grid grid-cols-3 gap-2">
             {instagramPosts.slice(0, visiblePosts).map((post, index) => {
-              // Always use the static lifestyle image
-              const imageUrl = "/instagram-post-lifestyle.png"
+              const imageUrl = post.imageUrl || "/placeholder.svg?height=200&width=200"
+              console.log("[v0] Rendering post", index, "with image:", imageUrl)
 
               return (
                 <div
@@ -516,9 +516,13 @@ export default function Step2() {
                   }}
                 >
                   <img
-                    src={imageUrl}
+                    src={imageUrl || "/placeholder.svg"}
                     alt={`Post ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("[v0] Failed to load image for post", index, "URL:", imageUrl)
+                      e.currentTarget.src = "/instagram-post-lifestyle.png"
+                    }}
                   />
                 </div>
               )
