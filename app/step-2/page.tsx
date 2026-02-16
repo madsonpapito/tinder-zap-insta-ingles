@@ -52,6 +52,13 @@ export default function DatingScanner() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [instagramUsername, setInstagramUsername] = useState("")
   const [whatsappNumber, setWhatsappNumber] = useState("")
+  const [igProfile, setIgProfile] = useState<{ username: string; full_name: string; profile_pic_url: string; follower_count: number; is_verified: boolean } | null>(null)
+  const [igLoading, setIgLoading] = useState(false)
+  const [igError, setIgError] = useState("")
+  const [waPhoto, setWaPhoto] = useState<string | null>(null)
+  const [waLoading, setWaLoading] = useState(false)
+  const igDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const waDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [scanPhase, setScanPhase] = useState(0)
   const [location, setLocation] = useState("your city")
@@ -100,6 +107,74 @@ export default function DatingScanner() {
       }
       reader.readAsDataURL(e.target.files[0])
     }
+  }
+
+  const handleInstagramChange = (value: string) => {
+    setInstagramUsername(value)
+    setIgProfile(null)
+    setIgError("")
+
+    if (igDebounceRef.current) clearTimeout(igDebounceRef.current)
+
+    const clean = value.replace("@", "").trim()
+    if (clean.length < 3) {
+      setIgLoading(false)
+      return
+    }
+
+    setIgLoading(true)
+    igDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/instagram/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: clean }),
+        })
+        const data = await res.json()
+        if (res.ok && data.success && data.profile) {
+          setIgProfile(data.profile)
+          setIgError("")
+        } else {
+          setIgError("Profile not found or private.")
+        }
+      } catch {
+        setIgError("Connection error.")
+      } finally {
+        setIgLoading(false)
+      }
+    }, 1000)
+  }
+
+  const handleWhatsappChange = (value: string) => {
+    setWhatsappNumber(value)
+    setWaPhoto(null)
+
+    if (waDebounceRef.current) clearTimeout(waDebounceRef.current)
+
+    const cleanPhone = value.replace(/\D/g, "")
+    if (cleanPhone.length < 8) {
+      setWaLoading(false)
+      return
+    }
+
+    setWaLoading(true)
+    waDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/whatsapp-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: cleanPhone }),
+        })
+        const data = await res.json()
+        if (data.success && data.result) {
+          setWaPhoto(data.result)
+        }
+      } catch {
+        // silent fail - photo is optional enhancement
+      } finally {
+        setWaLoading(false)
+      }
+    }, 1500)
   }
 
   const startInvestigation = () => {
@@ -353,10 +428,10 @@ export default function DatingScanner() {
         </div>
 
         {/* Instagram Input */}
-        <div className={`border-2 rounded-xl p-4 mb-4 transition-all duration-200 ${instagramUsername.trim().length > 0 ? 'border-pink-400 bg-pink-50' : 'border-gray-200'}`}>
+        <div className={`border-2 rounded-xl p-4 mb-4 transition-all duration-200 ${igProfile ? 'border-pink-400 bg-pink-50' : instagramUsername.trim().length > 0 ? 'border-pink-300 bg-pink-50/50' : 'border-gray-200'}`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${instagramUsername.trim().length > 0 ? 'bg-gradient-to-br from-purple-500 to-pink-500' : 'bg-gray-200'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={instagramUsername.trim().length > 0 ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${igProfile ? 'bg-gradient-to-br from-purple-500 to-pink-500' : 'bg-gray-200'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={igProfile ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
             </div>
             <div>
               <p className="font-semibold text-gray-800 text-sm">Instagram Username</p>
@@ -369,10 +444,51 @@ export default function DatingScanner() {
               type="text"
               placeholder="username"
               value={instagramUsername}
-              onChange={(e) => setInstagramUsername(e.target.value)}
+              onChange={(e) => handleInstagramChange(e.target.value)}
               className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </div>
+
+          {/* Instagram Loading */}
+          {igLoading && (
+            <div className="flex items-center gap-2 mt-3 text-pink-500">
+              <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              <span className="text-xs font-medium">Searching profile...</span>
+            </div>
+          )}
+
+          {/* Instagram Error */}
+          {igError && !igLoading && (
+            <p className="text-red-500 text-xs mt-2 font-medium">{igError}</p>
+          )}
+
+          {/* Instagram Profile Card */}
+          {igProfile && !igLoading && (
+            <div className="flex items-center gap-3 mt-3 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-pink-300 flex-shrink-0 bg-gray-100">
+                {igProfile.profile_pic_url ? (
+                  <img src={igProfile.profile_pic_url} alt="Instagram profile" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-gray-900 font-bold text-sm truncate">@{igProfile.username}</p>
+                  {igProfile.is_verified && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#3B82F6" stroke="white" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  )}
+                </div>
+                <p className="text-gray-500 text-xs truncate">{igProfile.full_name || ''}</p>
+                <p className="text-gray-400 text-[10px] mt-0.5">{igProfile.follower_count?.toLocaleString()} followers</p>
+              </div>
+              <div className="flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Divider */}
@@ -383,10 +499,10 @@ export default function DatingScanner() {
         </div>
 
         {/* WhatsApp Input */}
-        <div className={`border-2 rounded-xl p-4 transition-all duration-200 ${whatsappNumber.trim().length > 0 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+        <div className={`border-2 rounded-xl p-4 transition-all duration-200 ${waPhoto ? 'border-green-400 bg-green-50' : whatsappNumber.trim().length > 0 ? 'border-green-300 bg-green-50/50' : 'border-gray-200'}`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${whatsappNumber.trim().length > 0 ? 'bg-green-500' : 'bg-gray-200'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={whatsappNumber.trim().length > 0 ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${waPhoto ? 'bg-green-500' : 'bg-gray-200'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={waPhoto ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             </div>
             <div>
               <p className="font-semibold text-gray-800 text-sm">WhatsApp Number</p>
@@ -397,9 +513,34 @@ export default function DatingScanner() {
             type="tel"
             placeholder="+1 (555) 000-0000"
             value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
+            onChange={(e) => handleWhatsappChange(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
           />
+
+          {/* WhatsApp Loading */}
+          {waLoading && (
+            <div className="flex items-center gap-2 mt-3 text-green-500">
+              <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              <span className="text-xs font-medium">Looking up profile photo...</span>
+            </div>
+          )}
+
+          {/* WhatsApp Profile Photo Card */}
+          {waPhoto && !waLoading && (
+            <div className="flex items-center gap-3 mt-3 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-green-300 flex-shrink-0 bg-gray-100">
+                <img src={waPhoto} alt="WhatsApp profile" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-gray-900 font-bold text-sm">WhatsApp Profile</p>
+                <p className="text-gray-500 text-xs truncate">{whatsappNumber}</p>
+                <p className="text-green-600 text-[10px] mt-0.5 font-medium">Profile photo found</p>
+              </div>
+              <div className="flex-shrink-0">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              </div>
+            </div>
+          )}
         </div>
 
         <p className="text-sm text-gray-500 mt-5">We&apos;ll scan across all dating platforms to find matching profiles - even ones they think are hidden.</p>
