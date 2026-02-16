@@ -1,8 +1,130 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { CheckCircle, AlertTriangle, Lock, LockOpen, Heart, MessageCircle, Info } from "lucide-react"
+import { CheckCircle, AlertTriangle, Lock, LockOpen, Heart, MessageCircle, Info, ChevronDown } from "lucide-react"
 import { useFacebookTracking } from "@/hooks/useFacebookTracking"
+
+// ==========================================================
+// COUNTRY CODES (English-speaking first, then alphabetical)
+// ==========================================================
+const countryCodes = [
+  // English-speaking countries first
+  { code: "+1", flag: "\u{1F1FA}\u{1F1F8}", name: "United States", short: "US" },
+  { code: "+44", flag: "\u{1F1EC}\u{1F1E7}", name: "United Kingdom", short: "GB" },
+  { code: "+1", flag: "\u{1F1E8}\u{1F1E6}", name: "Canada", short: "CA" },
+  { code: "+61", flag: "\u{1F1E6}\u{1F1FA}", name: "Australia", short: "AU" },
+  { code: "+353", flag: "\u{1F1EE}\u{1F1EA}", name: "Ireland", short: "IE" },
+  { code: "+64", flag: "\u{1F1F3}\u{1F1FF}", name: "New Zealand", short: "NZ" },
+  { code: "+27", flag: "\u{1F1FF}\u{1F1E6}", name: "South Africa", short: "ZA" },
+  { code: "+254", flag: "\u{1F1F0}\u{1F1EA}", name: "Kenya", short: "KE" },
+  { code: "+234", flag: "\u{1F1F3}\u{1F1EC}", name: "Nigeria", short: "NG" },
+  { code: "+233", flag: "\u{1F1EC}\u{1F1ED}", name: "Ghana", short: "GH" },
+  { code: "+63", flag: "\u{1F1F5}\u{1F1ED}", name: "Philippines", short: "PH" },
+  { code: "+65", flag: "\u{1F1F8}\u{1F1EC}", name: "Singapore", short: "SG" },
+  { code: "+91", flag: "\u{1F1EE}\u{1F1F3}", name: "India", short: "IN" },
+  { code: "+1", flag: "\u{1F1EF}\u{1F1F2}", name: "Jamaica", short: "JM" },
+  { code: "+1", flag: "\u{1F1F9}\u{1F1F9}", name: "Trinidad & Tobago", short: "TT" },
+  // Separator - rest of world alphabetical
+  { code: "+93", flag: "\u{1F1E6}\u{1F1EB}", name: "Afghanistan", short: "AF" },
+  { code: "+355", flag: "\u{1F1E6}\u{1F1F1}", name: "Albania", short: "AL" },
+  { code: "+213", flag: "\u{1F1E9}\u{1F1FF}", name: "Algeria", short: "DZ" },
+  { code: "+376", flag: "\u{1F1E6}\u{1F1E9}", name: "Andorra", short: "AD" },
+  { code: "+244", flag: "\u{1F1E6}\u{1F1F4}", name: "Angola", short: "AO" },
+  { code: "+54", flag: "\u{1F1E6}\u{1F1F7}", name: "Argentina", short: "AR" },
+  { code: "+374", flag: "\u{1F1E6}\u{1F1F2}", name: "Armenia", short: "AM" },
+  { code: "+43", flag: "\u{1F1E6}\u{1F1F9}", name: "Austria", short: "AT" },
+  { code: "+994", flag: "\u{1F1E6}\u{1F1FF}", name: "Azerbaijan", short: "AZ" },
+  { code: "+973", flag: "\u{1F1E7}\u{1F1ED}", name: "Bahrain", short: "BH" },
+  { code: "+880", flag: "\u{1F1E7}\u{1F1E9}", name: "Bangladesh", short: "BD" },
+  { code: "+375", flag: "\u{1F1E7}\u{1F1FE}", name: "Belarus", short: "BY" },
+  { code: "+32", flag: "\u{1F1E7}\u{1F1EA}", name: "Belgium", short: "BE" },
+  { code: "+591", flag: "\u{1F1E7}\u{1F1F4}", name: "Bolivia", short: "BO" },
+  { code: "+387", flag: "\u{1F1E7}\u{1F1E6}", name: "Bosnia", short: "BA" },
+  { code: "+55", flag: "\u{1F1E7}\u{1F1F7}", name: "Brazil", short: "BR" },
+  { code: "+359", flag: "\u{1F1E7}\u{1F1EC}", name: "Bulgaria", short: "BG" },
+  { code: "+855", flag: "\u{1F1F0}\u{1F1ED}", name: "Cambodia", short: "KH" },
+  { code: "+237", flag: "\u{1F1E8}\u{1F1F2}", name: "Cameroon", short: "CM" },
+  { code: "+56", flag: "\u{1F1E8}\u{1F1F1}", name: "Chile", short: "CL" },
+  { code: "+86", flag: "\u{1F1E8}\u{1F1F3}", name: "China", short: "CN" },
+  { code: "+57", flag: "\u{1F1E8}\u{1F1F4}", name: "Colombia", short: "CO" },
+  { code: "+506", flag: "\u{1F1E8}\u{1F1F7}", name: "Costa Rica", short: "CR" },
+  { code: "+385", flag: "\u{1F1ED}\u{1F1F7}", name: "Croatia", short: "HR" },
+  { code: "+53", flag: "\u{1F1E8}\u{1F1FA}", name: "Cuba", short: "CU" },
+  { code: "+357", flag: "\u{1F1E8}\u{1F1FE}", name: "Cyprus", short: "CY" },
+  { code: "+420", flag: "\u{1F1E8}\u{1F1FF}", name: "Czech Republic", short: "CZ" },
+  { code: "+45", flag: "\u{1F1E9}\u{1F1F0}", name: "Denmark", short: "DK" },
+  { code: "+593", flag: "\u{1F1EA}\u{1F1E8}", name: "Ecuador", short: "EC" },
+  { code: "+20", flag: "\u{1F1EA}\u{1F1EC}", name: "Egypt", short: "EG" },
+  { code: "+503", flag: "\u{1F1F8}\u{1F1FB}", name: "El Salvador", short: "SV" },
+  { code: "+372", flag: "\u{1F1EA}\u{1F1EA}", name: "Estonia", short: "EE" },
+  { code: "+251", flag: "\u{1F1EA}\u{1F1F9}", name: "Ethiopia", short: "ET" },
+  { code: "+358", flag: "\u{1F1EB}\u{1F1EE}", name: "Finland", short: "FI" },
+  { code: "+33", flag: "\u{1F1EB}\u{1F1F7}", name: "France", short: "FR" },
+  { code: "+995", flag: "\u{1F1EC}\u{1F1EA}", name: "Georgia", short: "GE" },
+  { code: "+49", flag: "\u{1F1E9}\u{1F1EA}", name: "Germany", short: "DE" },
+  { code: "+30", flag: "\u{1F1EC}\u{1F1F7}", name: "Greece", short: "GR" },
+  { code: "+502", flag: "\u{1F1EC}\u{1F1F9}", name: "Guatemala", short: "GT" },
+  { code: "+504", flag: "\u{1F1ED}\u{1F1F3}", name: "Honduras", short: "HN" },
+  { code: "+852", flag: "\u{1F1ED}\u{1F1F0}", name: "Hong Kong", short: "HK" },
+  { code: "+36", flag: "\u{1F1ED}\u{1F1FA}", name: "Hungary", short: "HU" },
+  { code: "+354", flag: "\u{1F1EE}\u{1F1F8}", name: "Iceland", short: "IS" },
+  { code: "+62", flag: "\u{1F1EE}\u{1F1E9}", name: "Indonesia", short: "ID" },
+  { code: "+98", flag: "\u{1F1EE}\u{1F1F7}", name: "Iran", short: "IR" },
+  { code: "+964", flag: "\u{1F1EE}\u{1F1F6}", name: "Iraq", short: "IQ" },
+  { code: "+972", flag: "\u{1F1EE}\u{1F1F1}", name: "Israel", short: "IL" },
+  { code: "+39", flag: "\u{1F1EE}\u{1F1F9}", name: "Italy", short: "IT" },
+  { code: "+81", flag: "\u{1F1EF}\u{1F1F5}", name: "Japan", short: "JP" },
+  { code: "+962", flag: "\u{1F1EF}\u{1F1F4}", name: "Jordan", short: "JO" },
+  { code: "+7", flag: "\u{1F1F0}\u{1F1FF}", name: "Kazakhstan", short: "KZ" },
+  { code: "+82", flag: "\u{1F1F0}\u{1F1F7}", name: "South Korea", short: "KR" },
+  { code: "+965", flag: "\u{1F1F0}\u{1F1FC}", name: "Kuwait", short: "KW" },
+  { code: "+371", flag: "\u{1F1F1}\u{1F1FB}", name: "Latvia", short: "LV" },
+  { code: "+961", flag: "\u{1F1F1}\u{1F1E7}", name: "Lebanon", short: "LB" },
+  { code: "+218", flag: "\u{1F1F1}\u{1F1FE}", name: "Libya", short: "LY" },
+  { code: "+370", flag: "\u{1F1F1}\u{1F1F9}", name: "Lithuania", short: "LT" },
+  { code: "+352", flag: "\u{1F1F1}\u{1F1FA}", name: "Luxembourg", short: "LU" },
+  { code: "+60", flag: "\u{1F1F2}\u{1F1FE}", name: "Malaysia", short: "MY" },
+  { code: "+52", flag: "\u{1F1F2}\u{1F1FD}", name: "Mexico", short: "MX" },
+  { code: "+212", flag: "\u{1F1F2}\u{1F1E6}", name: "Morocco", short: "MA" },
+  { code: "+95", flag: "\u{1F1F2}\u{1F1F2}", name: "Myanmar", short: "MM" },
+  { code: "+977", flag: "\u{1F1F3}\u{1F1F5}", name: "Nepal", short: "NP" },
+  { code: "+31", flag: "\u{1F1F3}\u{1F1F1}", name: "Netherlands", short: "NL" },
+  { code: "+505", flag: "\u{1F1F3}\u{1F1EE}", name: "Nicaragua", short: "NI" },
+  { code: "+47", flag: "\u{1F1F3}\u{1F1F4}", name: "Norway", short: "NO" },
+  { code: "+968", flag: "\u{1F1F4}\u{1F1F2}", name: "Oman", short: "OM" },
+  { code: "+92", flag: "\u{1F1F5}\u{1F1F0}", name: "Pakistan", short: "PK" },
+  { code: "+507", flag: "\u{1F1F5}\u{1F1E6}", name: "Panama", short: "PA" },
+  { code: "+595", flag: "\u{1F1F5}\u{1F1FE}", name: "Paraguay", short: "PY" },
+  { code: "+51", flag: "\u{1F1F5}\u{1F1EA}", name: "Peru", short: "PE" },
+  { code: "+48", flag: "\u{1F1F5}\u{1F1F1}", name: "Poland", short: "PL" },
+  { code: "+351", flag: "\u{1F1F5}\u{1F1F9}", name: "Portugal", short: "PT" },
+  { code: "+974", flag: "\u{1F1F6}\u{1F1E6}", name: "Qatar", short: "QA" },
+  { code: "+40", flag: "\u{1F1F7}\u{1F1F4}", name: "Romania", short: "RO" },
+  { code: "+7", flag: "\u{1F1F7}\u{1F1FA}", name: "Russia", short: "RU" },
+  { code: "+966", flag: "\u{1F1F8}\u{1F1E6}", name: "Saudi Arabia", short: "SA" },
+  { code: "+381", flag: "\u{1F1F7}\u{1F1F8}", name: "Serbia", short: "RS" },
+  { code: "+421", flag: "\u{1F1F8}\u{1F1F0}", name: "Slovakia", short: "SK" },
+  { code: "+386", flag: "\u{1F1F8}\u{1F1EE}", name: "Slovenia", short: "SI" },
+  { code: "+34", flag: "\u{1F1EA}\u{1F1F8}", name: "Spain", short: "ES" },
+  { code: "+94", flag: "\u{1F1F1}\u{1F1F0}", name: "Sri Lanka", short: "LK" },
+  { code: "+46", flag: "\u{1F1F8}\u{1F1EA}", name: "Sweden", short: "SE" },
+  { code: "+41", flag: "\u{1F1E8}\u{1F1ED}", name: "Switzerland", short: "CH" },
+  { code: "+886", flag: "\u{1F1F9}\u{1F1FC}", name: "Taiwan", short: "TW" },
+  { code: "+255", flag: "\u{1F1F9}\u{1F1FF}", name: "Tanzania", short: "TZ" },
+  { code: "+66", flag: "\u{1F1F9}\u{1F1ED}", name: "Thailand", short: "TH" },
+  { code: "+216", flag: "\u{1F1F9}\u{1F1F3}", name: "Tunisia", short: "TN" },
+  { code: "+90", flag: "\u{1F1F9}\u{1F1F7}", name: "Turkey", short: "TR" },
+  { code: "+256", flag: "\u{1F1FA}\u{1F1EC}", name: "Uganda", short: "UG" },
+  { code: "+380", flag: "\u{1F1FA}\u{1F1E6}", name: "Ukraine", short: "UA" },
+  { code: "+971", flag: "\u{1F1E6}\u{1F1EA}", name: "UAE", short: "AE" },
+  { code: "+598", flag: "\u{1F1FA}\u{1F1FE}", name: "Uruguay", short: "UY" },
+  { code: "+998", flag: "\u{1F1FA}\u{1F1FF}", name: "Uzbekistan", short: "UZ" },
+  { code: "+58", flag: "\u{1F1FB}\u{1F1EA}", name: "Venezuela", short: "VE" },
+  { code: "+84", flag: "\u{1F1FB}\u{1F1F3}", name: "Vietnam", short: "VN" },
+  { code: "+967", flag: "\u{1F1FE}\u{1F1EA}", name: "Yemen", short: "YE" },
+  { code: "+260", flag: "\u{1F1FF}\u{1F1F2}", name: "Zambia", short: "ZM" },
+  { code: "+263", flag: "\u{1F1FF}\u{1F1FC}", name: "Zimbabwe", short: "ZW" },
+]
 
 // ==========================================================
 // DATA MOCKS (From previous u2m.html)
@@ -52,6 +174,10 @@ export default function DatingScanner() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [instagramUsername, setInstagramUsername] = useState("")
   const [whatsappNumber, setWhatsappNumber] = useState("")
+  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0])
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+  const [countrySearch, setCountrySearch] = useState("")
+  const countryDropdownRef = useRef<HTMLDivElement>(null)
   const [igProfile, setIgProfile] = useState<{ username: string; full_name: string; profile_pic_url: string; follower_count: number; is_verified: boolean } | null>(null)
   const [igLoading, setIgLoading] = useState(false)
   const [igError, setIgError] = useState("")
@@ -145,17 +271,20 @@ export default function DatingScanner() {
     }, 1000)
   }
 
-  const handleWhatsappChange = (value: string) => {
+  const handleWhatsappChange = (value: string, country?: typeof countryCodes[0]) => {
     setWhatsappNumber(value)
     setWaPhoto(null)
 
     if (waDebounceRef.current) clearTimeout(waDebounceRef.current)
 
     const cleanPhone = value.replace(/\D/g, "")
-    if (cleanPhone.length < 8) {
+    if (cleanPhone.length < 6) {
       setWaLoading(false)
       return
     }
+
+    const cc = country || selectedCountry
+    const fullPhone = cc.code.replace("+", "") + cleanPhone
 
     setWaLoading(true)
     waDebounceRef.current = setTimeout(async () => {
@@ -163,7 +292,7 @@ export default function DatingScanner() {
         const res = await fetch("/api/whatsapp-photo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: cleanPhone }),
+          body: JSON.stringify({ phone: fullPhone }),
         })
         const data = await res.json()
         if (data.success && data.result) {
@@ -176,6 +305,18 @@ export default function DatingScanner() {
       }
     }, 1500)
   }
+
+  // Close country dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(e.target as Node)) {
+        setShowCountryDropdown(false)
+        setCountrySearch("")
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const startInvestigation = () => {
     setStep(2)
@@ -509,13 +650,81 @@ export default function DatingScanner() {
               <p className="text-xs text-gray-500">We&apos;ll scan linked dating app accounts</p>
             </div>
           </div>
-          <input
-            type="tel"
-            placeholder="+1 (555) 000-0000"
-            value={whatsappNumber}
-            onChange={(e) => handleWhatsappChange(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
-          />
+          <div className="flex gap-2">
+            {/* Country Code Selector */}
+            <div className="relative" ref={countryDropdownRef}>
+              <button
+                type="button"
+                onClick={() => { setShowCountryDropdown(!showCountryDropdown); setCountrySearch("") }}
+                className="flex items-center gap-1.5 px-3 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 bg-white hover:bg-gray-50 transition-colors min-w-[100px] justify-between focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+              >
+                <span className="text-base leading-none">{selectedCountry.flag}</span>
+                <span className="font-medium">{selectedCountry.code}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showCountryDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showCountryDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                  {/* Search */}
+                  <div className="p-2 border-b border-gray-100">
+                    <input
+                      type="text"
+                      placeholder="Search country..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-300"
+                      autoFocus
+                    />
+                  </div>
+                  {/* List */}
+                  <div className="max-h-52 overflow-y-auto">
+                    {countryCodes
+                      .filter(c => {
+                        if (!countrySearch.trim()) return true
+                        const q = countrySearch.toLowerCase()
+                        return c.name.toLowerCase().includes(q) || c.code.includes(q) || c.short.toLowerCase().includes(q)
+                      })
+                      .map((c, i) => {
+                        // Add separator before non-English-speaking countries
+                        const showSeparator = i === 0 ? false : !countrySearch.trim() && i === 15
+                        return (
+                          <div key={`${c.short}-${i}`}>
+                            {showSeparator && (
+                              <div className="px-3 py-1.5 bg-gray-50 border-y border-gray-100">
+                                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Other Countries</span>
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(c)
+                                setShowCountryDropdown(false)
+                                setCountrySearch("")
+                                if (whatsappNumber.trim()) handleWhatsappChange(whatsappNumber, c)
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-green-50 transition-colors ${selectedCountry.short === c.short && selectedCountry.code === c.code ? 'bg-green-50' : ''}`}
+                            >
+                              <span className="text-base leading-none">{c.flag}</span>
+                              <span className="flex-1 text-sm text-gray-800 truncate">{c.name}</span>
+                              <span className="text-xs text-gray-500 font-mono">{c.code}</span>
+                            </button>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Phone Number Input */}
+            <input
+              type="tel"
+              placeholder="Phone number"
+              value={whatsappNumber}
+              onChange={(e) => handleWhatsappChange(e.target.value)}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
+            />
+          </div>
 
           {/* WhatsApp Loading */}
           {waLoading && (
@@ -533,7 +742,7 @@ export default function DatingScanner() {
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-gray-900 font-bold text-sm">WhatsApp Profile</p>
-                <p className="text-gray-500 text-xs truncate">{whatsappNumber}</p>
+                <p className="text-gray-500 text-xs truncate">{selectedCountry.code} {whatsappNumber}</p>
                 <p className="text-green-600 text-[10px] mt-0.5 font-medium">Profile photo found</p>
               </div>
               <div className="flex-shrink-0">
