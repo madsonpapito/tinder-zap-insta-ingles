@@ -50,6 +50,8 @@ export default function DatingScanner() {
   const [redFlags, setRedFlags] = useState<string[]>([])
   const [imageUploaded, setImageUploaded] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [instagramUsername, setInstagramUsername] = useState("")
+  const [whatsappNumber, setWhatsappNumber] = useState("")
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [scanPhase, setScanPhase] = useState(0)
   const [location, setLocation] = useState("your city")
@@ -112,7 +114,10 @@ export default function DatingScanner() {
         ageRange,
         relationshipStatus,
         suspicionLevel,
-        redFlags
+        redFlags,
+        instagramUsername: instagramUsername.trim() || null,
+        whatsappNumber: whatsappNumber.trim() || null,
+        hasPhoto: imageUploaded
       })
     }).catch(err => console.log('Survey save error', err))
 
@@ -159,7 +164,8 @@ export default function DatingScanner() {
     setRedFlags(prev => prev.includes(flag) ? prev.filter(f => f !== flag) : [...prev, flag])
   }
 
-  const allQuestionsAnswered = selectedGender && ageRange && relationshipStatus && suspicionLevel && redFlags.length > 0 && imageUploaded
+  const hasAtLeastOneContact = imageUploaded || instagramUsername.trim().length > 0 || whatsappNumber.trim().length > 0
+  const allQuestionsAnswered = selectedGender && ageRange && relationshipStatus && suspicionLevel && redFlags.length > 0 && hasAtLeastOneContact
 
   // --------------------------------------------------------
   // RENDER STEP 1: INPUT
@@ -310,20 +316,93 @@ export default function DatingScanner() {
         </p>
       </div>
 
-      {/* 5. Upload Box */}
+      {/* 5. Identification - Photo, Instagram, or WhatsApp */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Upload Their Photo for Facial Recognition</h2>
-        <label className="w-40 h-40 mx-auto flex items-center justify-center border-2 border-dashed border-blue-400 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden">
-          <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-          {imagePreview ? (
-            <img src={imagePreview} className="w-full h-full object-cover absolute" />
-          ) : (
-            <div className="text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Help Us Identify Them</h2>
+        <p className="text-sm text-gray-500 mb-5">Provide at least <span className="font-semibold text-gray-700">one</span> of the options below so we can start the investigation.</p>
+
+        {/* Photo Upload */}
+        <div className={`border-2 rounded-xl p-4 mb-4 transition-all duration-200 ${imageUploaded ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${imageUploaded ? 'bg-green-500' : 'bg-gray-200'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={imageUploaded ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
             </div>
-          )}
-        </label>
-        <p className="text-sm text-gray-500 mt-4">We&apos;ll scan across all dating platforms to find matching profiles - even ones they think are hidden.</p>
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">Upload Their Photo</p>
+              <p className="text-xs text-gray-500">For facial recognition across dating platforms</p>
+            </div>
+          </div>
+          <label className="w-full h-32 flex items-center justify-center border-2 border-dashed border-blue-400 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden">
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+            {imagePreview ? (
+              <img src={imagePreview} alt="Uploaded preview" className="w-full h-full object-cover absolute" />
+            ) : (
+              <div className="text-gray-400 flex flex-col items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
+                <span className="text-xs text-gray-400">Tap to upload a photo</span>
+              </div>
+            )}
+          </label>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-gray-200"></div>
+          <span className="text-xs font-semibold text-gray-400 uppercase">or</span>
+          <div className="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        {/* Instagram Input */}
+        <div className={`border-2 rounded-xl p-4 mb-4 transition-all duration-200 ${instagramUsername.trim().length > 0 ? 'border-pink-400 bg-pink-50' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${instagramUsername.trim().length > 0 ? 'bg-gradient-to-br from-purple-500 to-pink-500' : 'bg-gray-200'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={instagramUsername.trim().length > 0 ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">Instagram Username</p>
+              <p className="text-xs text-gray-500">We&apos;ll cross-reference their social activity</p>
+            </div>
+          </div>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
+            <input
+              type="text"
+              placeholder="username"
+              value={instagramUsername}
+              onChange={(e) => setInstagramUsername(e.target.value)}
+              className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-gray-200"></div>
+          <span className="text-xs font-semibold text-gray-400 uppercase">or</span>
+          <div className="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        {/* WhatsApp Input */}
+        <div className={`border-2 rounded-xl p-4 transition-all duration-200 ${whatsappNumber.trim().length > 0 ? 'border-green-400 bg-green-50' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${whatsappNumber.trim().length > 0 ? 'bg-green-500' : 'bg-gray-200'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={whatsappNumber.trim().length > 0 ? 'white' : '#9CA3AF'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-800 text-sm">WhatsApp Number</p>
+              <p className="text-xs text-gray-500">We&apos;ll scan linked dating app accounts</p>
+            </div>
+          </div>
+          <input
+            type="tel"
+            placeholder="+1 (555) 000-0000"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition-all"
+          />
+        </div>
+
+        <p className="text-sm text-gray-500 mt-5">We&apos;ll scan across all dating platforms to find matching profiles - even ones they think are hidden.</p>
       </div>
 
       <button
