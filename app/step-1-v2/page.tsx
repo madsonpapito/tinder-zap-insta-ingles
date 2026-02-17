@@ -3,7 +3,7 @@
 import { Search, Shield, ShieldCheck, Heart, MessageSquare, Check, CheckCircle, Star, Users, AlertTriangle } from 'lucide-react'
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
-import { FacebookTracker } from '@/components/FacebookTracker'
+
 
 
 const StarRating = ({ rating = 5 }) => (
@@ -23,13 +23,6 @@ export default function Step1V2() {
 
     return (
         <div className="bg-white text-gray-800 font-sans">
-            {/* Facebook Tracking - envia dados enriquecidos para o dataLayer */}
-            <FacebookTracker
-                eventName="Lead"
-                contentName="Step 1 V2 - Landing Page"
-                contentCategory="Sales Funnel"
-            />
-
             {/* Hero Section */}
             <section className="bg-gradient-to-br from-[#1d1d3a] via-[#2a2a4b] to-[#3a2c6b] text-white py-16 px-4 overflow-hidden">
                 <div className="container mx-auto max-w-3xl text-center flex flex-col items-center">

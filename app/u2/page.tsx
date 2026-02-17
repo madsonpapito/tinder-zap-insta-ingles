@@ -4,7 +4,7 @@ import Script from "next/script"
 import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
 import { Zap, AlertTriangle, Flame, Lock, Camera, ChevronLeft, ChevronRight, CheckCircle, Users, MapPin, X, Loader2, Search } from "lucide-react"
-import { useFacebookTracking } from '@/hooks/useFacebookTracking'
+
 
 
 // --- DEFINIÇÃO DE TIPO E DADOS DOS MATCHES ---

@@ -3,7 +3,7 @@
 import { Search, Activity, Instagram, MapPin, Eye, ShieldCheck, Heart, Camera, MessageSquare, Check, CheckCircle, Star, FolderArchive, Users } from 'lucide-react'
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
-import { FacebookTracker } from '@/components/FacebookTracker'
+
 
 
 // Componente auxiliar para as estrelas
@@ -24,13 +24,6 @@ export default function Step1() {
 
   return (
     <div className="bg-white text-gray-800 font-sans">
-      {/* Facebook Tracking - envia dados enriquecidos para o dataLayer */}
-      <FacebookTracker
-        eventName="Lead"
-        contentName="Step 1 - Landing Page"
-        contentCategory="Sales Funnel"
-      />
-
       {/* =================================== */}
       {/* 1. Hero Section                     */}
       {/* =================================== */}

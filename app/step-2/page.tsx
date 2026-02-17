@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { CheckCircle, AlertTriangle, Lock, LockOpen, Heart, MessageCircle, Info, ChevronDown } from "lucide-react"
-import { useFacebookTracking } from "@/hooks/useFacebookTracking"
+
 
 // ==========================================================
 // COUNTRY CODES (English-speaking first, then alphabetical)
@@ -196,8 +196,6 @@ export default function DatingScanner() {
     checkoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [])
 
-  const { trackEvent, trackInitiateCheckout } = useFacebookTracking()
-
   useEffect(() => {
     // Corrected location fetch
     fetch("/api/location")
@@ -344,18 +342,6 @@ export default function DatingScanner() {
         hasPhoto: imageUploaded
       })
     }).catch(() => {})
-
-    // Tracking (wrapped in try-catch to prevent crashes)
-    try {
-      const userGender = selectedGender === 'male' ? 'female' : selectedGender === 'female' ? 'male' : undefined;
-      trackEvent('ViewContent', { gender: userGender }, {
-        content_name: 'Dating Analysis Started',
-        content_category: 'Engagement',
-        target_gender: selectedGender,
-      });
-    } catch (e) {
-      // ignore tracking errors
-    }
 
     // Simulate Loading with scan phases
     const scanSteps = [1, 2, 3, 4, 5]

@@ -3,7 +3,7 @@
 import { Search, Activity, Instagram, MapPin, Eye, ShieldCheck, Heart, Camera, MessageSquare, Check, CheckCircle, Star, FolderArchive, Users, Smartphone, ScanFace } from 'lucide-react'
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
-import { FacebookTracker } from '@/components/FacebookTracker'
+
 
 // Componente auxiliar para as estrelas
 const StarRating = ({ rating = 5 }: { rating?: number }) => (
@@ -23,13 +23,6 @@ export default function Step1Unisex() {
 
     return (
         <div className="bg-white text-gray-800 font-sans">
-            {/* Facebook Tracking */}
-            <FacebookTracker
-                eventName="Lead"
-                contentName="Step 1 - Unisex Landing Page"
-                contentCategory="Sales Funnel"
-            />
-
             {/* Hero Section */}
             <section className="bg-gradient-to-br from-[#0A1128] via-[#1d1d3a] to-[#2D1B69] text-white py-16 px-4 overflow-hidden">
                 <div className="container mx-auto max-w-3xl text-center flex flex-col items-center">
