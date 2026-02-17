@@ -318,10 +318,18 @@ export default function DatingScanner() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const startInvestigation = () => {
-    setStep(2)
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
-    // Save survey responses for analytics
+  const startInvestigation = () => {
+    // Clear any previous timers
+    timersRef.current.forEach(t => clearTimeout(t))
+    timersRef.current = []
+
+    setStep(2)
+    setScanPhase(0)
+    setLoadingProgress(0)
+
+    // Save survey responses for analytics (fire and forget)
     fetch('/api/survey-responses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -335,38 +343,50 @@ export default function DatingScanner() {
         whatsappNumber: whatsappNumber.trim() || null,
         hasPhoto: imageUploaded
       })
-    }).catch(err => console.log('Survey save error', err))
+    }).catch(() => {})
 
-    // Tracking
-    const userGender = selectedGender === 'male' ? 'female' : selectedGender === 'female' ? 'male' : undefined;
-    trackEvent('ViewContent', { gender: userGender }, {
-      content_name: 'Dating Analysis Started',
-      content_category: 'Engagement',
-      target_gender: selectedGender,
-    });
+    // Tracking (wrapped in try-catch to prevent crashes)
+    try {
+      const userGender = selectedGender === 'male' ? 'female' : selectedGender === 'female' ? 'male' : undefined;
+      trackEvent('ViewContent', { gender: userGender }, {
+        content_name: 'Dating Analysis Started',
+        content_category: 'Engagement',
+        target_gender: selectedGender,
+      });
+    } catch (e) {
+      // ignore tracking errors
+    }
 
     // Simulate Loading with scan phases
     const scanSteps = [1, 2, 3, 4, 5]
     scanSteps.forEach((phase, i) => {
-      setTimeout(() => {
+      const t = setTimeout(() => {
         setScanPhase(phase)
         setLoadingProgress(((i + 1) / scanSteps.length) * 80)
       }, (i + 1) * 1400)
+      timersRef.current.push(t)
     })
 
     // Transition to intermediate results (step 2.5)
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
       setScanPhase(6)
       setLoadingProgress(100)
     }, 8000)
+    timersRef.current.push(t1)
 
     // Transition to full results
-    setTimeout(() => {
+    const t2 = setTimeout(() => {
       setStep(3)
-      setScanPhase(0)
-      setLoadingProgress(0)
     }, 13000)
+    timersRef.current.push(t2)
   }
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(t => clearTimeout(t))
+    }
+  }, [])
 
   const getActiveData = () => {
     if (selectedGender === 'male') return { matches: femaleMatchesData, photos: femaleCensoredPhotos }
