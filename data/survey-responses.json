@@ -1,0 +1,275 @@
+{
+  "responses": [
+    {
+      "id": 1770908783701,
+      "timestamp": "2026-02-12T15:06:23.701Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone",
+        "changed_passwords"
+      ]
+    },
+    {
+      "id": 1770908803205,
+      "timestamp": "2026-02-12T15:06:43.205Z",
+      "gender": "male",
+      "ageRange": "18-24",
+      "relationshipStatus": "married",
+      "suspicionLevel": "certain",
+      "redFlags": [
+        "hide_phone",
+        "deleting_messages"
+      ]
+    },
+    {
+      "id": 1770909107822,
+      "timestamp": "2026-02-12T15:11:47.822Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "certain",
+      "redFlags": [
+        "changed_passwords"
+      ]
+    },
+    {
+      "id": 1770909229637,
+      "timestamp": "2026-02-12T15:13:49.637Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "relationship",
+      "suspicionLevel": "unsure",
+      "redFlags": [
+        "late_nights"
+      ]
+    },
+    {
+      "id": 1770909314188,
+      "timestamp": "2026-02-12T15:15:14.188Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770909336219,
+      "timestamp": "2026-02-12T15:15:36.219Z",
+      "gender": "male",
+      "ageRange": "35-44",
+      "relationshipStatus": "relationship",
+      "suspicionLevel": "unsure",
+      "redFlags": [
+        "late_nights",
+        "appearance_change"
+      ]
+    },
+    {
+      "id": 1770909664549,
+      "timestamp": "2026-02-12T15:21:04.549Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770910552956,
+      "timestamp": "2026-02-12T15:35:52.956Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770911783313,
+      "timestamp": "2026-02-12T15:56:23.313Z",
+      "gender": "female",
+      "ageRange": "45+",
+      "relationshipStatus": "dating",
+      "suspicionLevel": "checking",
+      "redFlags": [
+        "appearance_change"
+      ]
+    },
+    {
+      "id": 1770912303416,
+      "timestamp": "2026-02-12T16:05:03.416Z",
+      "gender": "male",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770912820610,
+      "timestamp": "2026-02-12T16:13:40.610Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770912868019,
+      "timestamp": "2026-02-12T16:14:28.019Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770912944836,
+      "timestamp": "2026-02-12T16:15:44.836Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1770912975686,
+      "timestamp": "2026-02-12T16:16:15.686Z",
+      "gender": "female",
+      "ageRange": "25-34",
+      "relationshipStatus": "married",
+      "suspicionLevel": "gut",
+      "redFlags": [
+        "hide_phone"
+      ]
+    },
+    {
+      "id": 1771287677884,
+      "timestamp": "2026-02-17T00:21:17.884Z",
+      "gender": "female",
+      "ageRange": "18-24",
+      "relationshipStatus": "married",
+      "suspicionLevel": "certain",
+      "redFlags": [
+        "deleting_messages"
+      ]
+    }
+  ],
+  "summary": {
+    "totalResponses": 15,
+    "gender": [
+      {
+        "value": "female",
+        "count": 12,
+        "percentage": 80
+      },
+      {
+        "value": "male",
+        "count": 3,
+        "percentage": 20
+      }
+    ],
+    "ageRange": [
+      {
+        "value": "25-34",
+        "count": 11,
+        "percentage": 73
+      },
+      {
+        "value": "18-24",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "35-44",
+        "count": 1,
+        "percentage": 7
+      },
+      {
+        "value": "45+",
+        "count": 1,
+        "percentage": 7
+      }
+    ],
+    "relationshipStatus": [
+      {
+        "value": "married",
+        "count": 12,
+        "percentage": 80
+      },
+      {
+        "value": "relationship",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "dating",
+        "count": 1,
+        "percentage": 7
+      }
+    ],
+    "suspicionLevel": [
+      {
+        "value": "gut",
+        "count": 9,
+        "percentage": 60
+      },
+      {
+        "value": "certain",
+        "count": 3,
+        "percentage": 20
+      },
+      {
+        "value": "unsure",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "checking",
+        "count": 1,
+        "percentage": 7
+      }
+    ],
+    "redFlags": [
+      {
+        "value": "hide_phone",
+        "count": 10,
+        "percentage": 67
+      },
+      {
+        "value": "changed_passwords",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "deleting_messages",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "late_nights",
+        "count": 2,
+        "percentage": 13
+      },
+      {
+        "value": "appearance_change",
+        "count": 2,
+        "percentage": 13
+      }
+    ]
+  }
+}
